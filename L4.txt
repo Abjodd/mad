@@ -1,0 +1,109 @@
+
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Change Wallpaper"
+        android:layout_centerInParent="true" />
+
+</RelativeLayout>
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------
+
+package com.example.myapplication;
+
+import android.app.WallpaperManager;
+import android.graphics.Bitmap;
+import android.widget.Toast;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import androidx.appcompat.app.AppCompatActivity;
+import java.io.IOException;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class MainActivity extends AppCompatActivity {
+    int[] images = {R.drawable.img1, R.drawable.img2, R.drawable.img3, R.drawable.img4, R.drawable.img5};
+    WallpaperManager wallpaperManager;
+    Timer timer = new Timer();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        wallpaperManager = WallpaperManager.getInstance(this);
+        Button button = findViewById(R.id.button1);
+        button.setOnClickListener(view -> changeWallpaper());
+    }
+
+    private void changeWallpaper() {
+        Toast.makeText(MainActivity.this, "Changing wallpaper", Toast.LENGTH_SHORT).show();
+
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Bitmap bitmap = ((BitmapDrawable) getResources().getDrawable(images[new Random().nextInt(images.length)])).getBitmap();
+                try {
+                    wallpaperManager.setBitmap(bitmap);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, 0, 30000);
+    }
+}
+
+
+
+--------------------------------------------------------------------------
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MyApplication"
+        tools:targetApi="31">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+
+</manifest>
