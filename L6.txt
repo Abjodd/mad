@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:text="PARSER"
+        android:textSize="36sp" />
+
+    <Button
+        android:id="@+id/buttonXml"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textView"
+        android:layout_marginTop="20dp"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="50dp"
+        android:backgroundTint="#F1B763"
+        android:text="XML"
+        android:onClick="parsexml" />
+
+    <Button
+        android:id="@+id/buttonJson"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textView"
+        android:layout_marginTop="20dp"
+        android:layout_toEndOf="@id/buttonXml"
+        android:layout_marginStart="30dp"
+        android:backgroundTint="#CDDC39"
+        android:text="JSON"
+        android:onClick="parsejson" />
+
+    <TextView
+        android:id="@+id/display"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/buttonXml"
+        android:layout_marginTop="30dp"
+        android:layout_centerHorizontal="true"
+        android:textAlignment="center"
+        android:textColor="#EF3A78"
+        android:textSize="18sp" />
+</RelativeLayout>
+
+
+
+
+package com.example.jsonparser;
+
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+public class MainActivity extends AppCompatActivity {
+    TextView display;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        display = findViewById(R.id.display);
+    }
+
+    public void parsexml(View v) {
+        try {
+            InputStream is = getAssets().open("city.xml");
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(is);
+            StringBuilder stringBuilder = new StringBuilder("XML DATA\n-------------");
+
+            NodeList nodeList = document.getElementsByTagName("place");
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Node node = nodeList.item(i);
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    Element element = (Element) node;
+                    stringBuilder.append("\nName: ").append(getValue("name", element))
+                            .append("\nLatitude: ").append(getValue("lat", element))
+                            .append("\nLongitude: ").append(getValue("long", element))
+                            .append("\nTemperature: ").append(getValue("temperature", element))
+                            .append("\nHumidity: ").append(getValue("humidity", element))
+                            .append("\n----------");
+                }
+            }
+            display.setText(stringBuilder.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(MainActivity.this, "Error in reading XML FILE", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void parsejson(View v) {
+        try {
+            InputStream is = getAssets().open("city.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            String json = new String(buffer, StandardCharsets.UTF_8);
+            JSONArray jsonArray = new JSONArray(json);
+            StringBuilder stringBuilder = new StringBuilder("JSON DATA\n--------");
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                stringBuilder.append("\nName: ").append(jsonObject.getString("name"))
+                        .append("\nLatitude: ").append(jsonObject.getString("lat"))
+                        .append("\nLongitude: ").append(jsonObject.getString("long"))
+                        .append("\nTemperature: ").append(jsonObject.getString("temperature"))
+                        .append("\nHumidity: ").append(jsonObject.getString("humidity"))
+                        .append("\n----------");
+            }
+            display.setText(stringBuilder.toString());
+            is.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(MainActivity.this, "Error in reading JSON file", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private String getValue(String tag, Element element) {
+        return element.getElementsByTagName(tag).item(0).getTextContent();
+    }
+}
+
+
+
+
+
+<?xml version="1.0"?>
+<records>
+    <place>
+        <name>Mysore</name>
+        <lat>12.295</lat>
+        <long>76.639</long>
+        <temperature>22</temperature>
+        <humidity>90%</humidity>
+    </place>
+    <place>
+        <name>Bangalore</name>
+        <lat>13.295</lat>
+        <long>77.639</long>
+        <temperature>25</temperature>
+        <humidity>74%</humidity>
+    </place>
+</records>
+
+
+
+[
+  {
+    "name":"HASSAN",
+    "lat":"12.295",
+    "long":"76.639",
+    "temperature":"22",
+    "humidity":"92%"
+  },
+  {
+    "name":"MANDYA",
+    "lat":"10.11",
+    "long":"66.639",
+    "temperature":"24",
+    "humidity":"82%"
+  }
+]
+
